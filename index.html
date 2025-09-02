@@ -67,6 +67,9 @@
   .category-card:hover { background: var(--accent); color: var(--bg); transform: scale(1.03); }
   .category-card.locked { background: #44418a; cursor: default; opacity: 0.7; transform: none; }
   .turn-info { text-align: center; margin-bottom: 1rem; }
+  .die.hidden {
+    visibility: hidden;
+  }
 </style>
 </head>
 <body>
@@ -106,7 +109,16 @@
 
 <script>
 const CATEGORIES = ["Ones","Twos","Threes","Fours","Fives","Sixes","Three of a Kind","Four of a Kind","Full House","Small Straight","Large Straight","Yahtzee","Chance"];
-const STATE = { players: [], currentPlayer:0, dice:[1,1,1,1,1], held:[false,false,false,false,false], rollsLeft:3, sheets:[], started:false };
+const STATE = { 
+  players: [], 
+  currentPlayer:0, 
+  dice:[1,1,1,1,1], 
+  held:[false,false,false,false,false], 
+  rollsLeft:3, 
+  sheets:[], 
+  started:false,
+  rolled: false   // new flag to track first roll
+};
 
 const els = {
   playerCount: document.getElementById("playerCount"),
@@ -137,15 +149,31 @@ function startGame(){
   renderDice(); renderScoreCards(); updateTurnInfo();
 }
 
-function resetGame(){ STATE.players=[]; STATE.sheets=[]; STATE.currentPlayer=0; STATE.dice=[1,1,1,1,1]; STATE.held=[false,false,false,false,false]; STATE.rollsLeft=3; STATE.started=false; els.diceRow.innerHTML=''; els.scoreCards.innerHTML=''; updateTurnInfo(); }
+function resetGame(){ 
+  STATE.players=[]; STATE.sheets=[]; STATE.currentPlayer=0; 
+  STATE.dice=[1,1,1,1,1]; STATE.held=[false,false,false,false,false]; 
+  STATE.rollsLeft=3; STATE.started=false; STATE.rolled=false;
+  els.diceRow.innerHTML=''; els.scoreCards.innerHTML=''; updateTurnInfo(); 
+}
+
+function endTurn(){
+  STATE.currentPlayer=(STATE.currentPlayer+1)%STATE.players.length; 
+  STATE.dice=[1,1,1,1,1]; STATE.held=[false,false,false,false,false]; 
+  STATE.rollsLeft=3; STATE.rolled=false;
+  renderDice(); renderScoreCards(); updateTurnInfo();
+}
 
 function rollDieVal(){ return Math.floor(Math.random()*6)+1; }
 
 function rollDice(){
   if(!STATE.started || STATE.rollsLeft<=0) return;
+  STATE.rolled = true;  // first roll triggers dice visibility
   STATE.dice = STATE.dice.map((v,i)=> STATE.held[i]?v:rollDieVal());
-  STATE.rollsLeft--; renderDice(); updateTurnInfo();
+  STATE.rollsLeft--; 
+  renderDice(); 
+  updateTurnInfo();
 }
+
 
 function toggleHold(i){
   if(!STATE.started || STATE.rollsLeft===3) return;
@@ -155,12 +183,24 @@ function toggleHold(i){
 function renderDice(){
   els.diceRow.innerHTML='';
   STATE.dice.forEach((v,i)=>{
-    const die = document.createElement('div'); die.className='die'+(STATE.held[i]?' held':''); die.addEventListener('click',()=>toggleHold(i));
+    const die = document.createElement('div'); 
+    die.className='die'+(STATE.held[i]?' held':'') + (!STATE.rolled ? ' hidden':'');
+    die.addEventListener('click',()=>toggleHold(i));
+
+    if(!STATE.rolled) return; // skip adding pips until first roll
+
     const positions = {1:[[50,50]],2:[[25,25],[75,75]],3:[[25,25],[50,50],[75,75]],4:[[25,25],[25,75],[75,25],[75,75]],5:[[25,25],[25,75],[50,50],[75,25],[75,75]],6:[[25,25],[25,50],[25,75],[75,25],[75,50],[75,75]]};
-    positions[v].forEach(([x,y])=>{ const pip=document.createElement('div'); pip.className='pip'; pip.style.left=x+'%'; pip.style.top=y+'%'; die.appendChild(pip); });
+    positions[v].forEach(([x,y])=>{
+      const pip=document.createElement('div'); 
+      pip.className='pip'; 
+      pip.style.left=x+'%'; 
+      pip.style.top=y+'%'; 
+      die.appendChild(pip);
+    });
     els.diceRow.appendChild(die);
   });
 }
+
 
 function updateTurnInfo(){ els.currentPlayerName.textContent = STATE.started ? STATE.players[STATE.currentPlayer] : '—'; els.rollsLeft.textContent=STATE.rollsLeft; }
 
