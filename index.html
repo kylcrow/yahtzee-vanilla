@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Yahtzee — Up to 4 Players (Vanilla JS)</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="app-header">
+    <h1>Yahtzee</h1>
+    <div class="players-setup">
+      <label for="playerCount">Players:</label>
+      <select id="playerCount">
+        <option value="1">1</option>
+        <option value="2" selected>2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+      </select>
+      <div class="player-names">
+        <input id="p0" placeholder="Player 1" />
+        <input id="p1" placeholder="Player 2" />
+        <input id="p2" placeholder="Player 3" />
+        <input id="p3" placeholder="Player 4" />
+      </div>
+      <button id="startGameBtn" class="primary">Start Game</button>
+      <button id="resetGameBtn" class="ghost">Reset</button>
+    </div>
+  </header>
+
+  <main class="app-main">
+    <section class="game-panel">
+      <div class="turn-info">
+        <div>Current Player: <span id="currentPlayerName">—</span></div>
+        <div>Rolls Left: <span id="rollsLeft">3</span></div>
+      </div>
+
+      <div class="dice-row" id="diceRow" aria-live="polite">
+        <!-- Dice buttons inserted by JS -->
+      </div>
+
+      <div class="controls">
+        <button id="rollBtn" class="primary">Roll Dice</button>
+        <button id="endTurnBtn" class="ghost">End Turn (Skip Scoring)</button>
+      </div>
+
+      <details class="rules">
+        <summary>Rules & Tips</summary>
+        <ul>
+          <li>You get up to 3 rolls each turn. Click dice to hold/unhold between rolls.</li>
+          <li>Pick a scoring category in the table to lock it in for this turn.</li>
+          <li>Upper section bonus: +35 if total 1–6 ≥ 63.</li>
+        </ul>
+      </details>
+    </section>
+
+    <section class="score-panel">
+      <h2>Score Card</h2>
+      <div id="scoreTableWrapper"></div>
+    </section>
+  </main>
+
+  <footer class="app-footer">
+    <span>Vanilla JS • No frameworks • Local-only</span>
+    <button id="exportStateBtn" class="ghost small">Export Game</button>
+    <button id="importStateBtn" class="ghost small">Import Game</button>
+    <input id="importFile" type="file" accept="application/json" hidden />
+  </footer>
+
+  <script src="main.js" defer></script>
+</body>
+</html>
