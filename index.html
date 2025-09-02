@@ -1,249 +1,260 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Yahtzee – Golden Purple Blue Theme</title>
-<style>
-  :root {
-    --bg: #1a0b3f;
-    --panel: #2b135e;
-    --accent: #ffd700;
-    --highlight: #7f5aff;
-    --text: #e0e0ff;
-    --card: #321977;
-    --card-hover: #4a2ea6;
-    --dice-bg: #ffeb7f;
-    --dice-pip: #2b135e;
-    --dice-held: #ffcc00;
-  }
-  * { box-sizing: border-box; }
-  body {
-    margin: 0;
-    font-family: 'Segoe UI', sans-serif;
-    background: radial-gradient(circle at top left, var(--panel), var(--bg));
-    color: var(--text);
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-  }
-  header {
-    padding: 1rem;
-    text-align: center;
-    background: linear-gradient(90deg, var(--highlight), var(--accent));
-    color: var(--bg);
-  }
-  header h1 { margin: 0; font-size: 2rem; }
-  .players-setup {
-    display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; margin-top: 0.5rem;
-  }
-  .players-setup input, .players-setup select, .players-setup button {
-    padding: 0.5rem; border-radius: 0.5rem; border: none;
-  }
-  .players-setup input { width: 120px; }
-  main { flex: 1; display: flex; flex-wrap: wrap; gap: 1rem; padding: 1rem; justify-content: center; }
-  .game-panel, .score-panel { background: var(--card); border-radius: 1rem; padding: 1rem; flex: 1 1 350px; }
-  .dice-row { display: flex; gap: 0.5rem; justify-content: center; margin-bottom: 1rem; flex-wrap: wrap; }
-  .die {
-    width: 60px; height: 60px; background: var(--dice-bg); border-radius: 12px;
-    display: grid; place-items: center; cursor: pointer; position: relative; transition: transform 0.2s, background 0.2s;
-    box-shadow: 2px 2px 6px rgba(0,0,0,0.5);
-  }
-  .die.held { background: var(--dice-held); transform: scale(1.1); }
-  .pip {
-    width: 10px; height: 10px; background: var(--dice-pip); border-radius: 50%;
-    position: absolute;
-  }
-  .controls { display: flex; justify-content: center; gap: 1rem; margin-bottom: 1rem; }
-  .controls button { padding: 0.5rem 1rem; border-radius: 0.5rem; border: none; cursor: pointer; font-weight: bold;
-    background: var(--highlight); color: var(--bg); transition: transform 0.2s, background 0.2s;
-  }
-  .controls button:hover { background: var(--accent); transform: scale(1.05); }
-  .score-panel { display: flex; flex-direction: column; gap: 0.5rem; }
-  .category-card {
-    background: var(--card-hover); border-radius: 0.5rem; padding: 0.5rem; cursor: pointer;
-    display: flex; justify-content: space-between; align-items: center; transition: transform 0.2s, background 0.2s;
-  }
-  .category-card:hover { background: var(--accent); color: var(--bg); transform: scale(1.03); }
-  .category-card.locked { background: #44418a; cursor: default; opacity: 0.7; transform: none; }
-  .turn-info { text-align: center; margin-bottom: 1rem; }
-  .die.hidden {
-    visibility: hidden;
-  }
-</style>
+  <meta charset="UTF-8">
+  <title>Yahtzee</title>
+  <style>
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background: linear-gradient(135deg, #2e026d, #1e3a8a, #d97706);
+      color: #f9fafb;
+      text-align: center;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+      color: #fbbf24;
+    }
+    #game {
+      max-width: 1200px;
+      margin: auto;
+    }
+    #dice-row {
+      display: flex;
+      justify-content: center;
+      margin: 20px 0;
+      gap: 15px;
+      min-height: 120px; /* keeps layout steady when dice are hidden */
+    }
+    .die {
+      width: 80px;
+      height: 80px;
+      background: #fbbf24;
+      border-radius: 16px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+      transition: transform 0.2s;
+    }
+    .die:hover {
+      transform: scale(1.05);
+    }
+    .die.held {
+      border: 4px solid #3b82f6;
+    }
+    .pip {
+      width: 14px;
+      height: 14px;
+      background: #1e293b;
+      border-radius: 50%;
+      position: absolute;
+      transform: translate(-50%, -50%);
+    }
+    button {
+      background: #3b82f6;
+      border: none;
+      color: white;
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      margin: 4px;
+      font-size: 0.9rem;
+      transition: background 0.2s;
+    }
+    button:hover:not(:disabled) {
+      background: #2563eb;
+    }
+    button:disabled {
+      background: #6b7280;
+      cursor: not-allowed;
+    }
+    #score-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit,minmax(250px,1fr));
+      gap: 20px;
+      margin-top: 30px;
+    }
+    .score-card {
+      background: rgba(255,255,255,0.1);
+      padding: 15px;
+      border-radius: 12px;
+      text-align: left;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    }
+    .score-card h3 {
+      margin: 0 0 10px;
+      font-size: 1.2rem;
+      color: #facc15;
+    }
+    .score-card button {
+      display: block;
+      width: 100%;
+      text-align: left;
+    }
+  </style>
 </head>
 <body>
-<header>
-  <h1>Yahtzee – Golden Purple Blue</h1>
-  <div class="players-setup">
-    <label>Players:</label>
-    <select id="playerCount">
-      <option value="1">1</option><option value="2" selected>2</option><option value="3">3</option><option value="4">4</option>
-    </select>
-    <input id="p0" placeholder="Player 1">
-    <input id="p1" placeholder="Player 2">
-    <input id="p2" placeholder="Player 3">
-    <input id="p3" placeholder="Player 4">
-    <button id="startGameBtn">Start Game</button>
-    <button id="resetGameBtn">Reset</button>
+  <h1>Yahtzee</h1>
+  <div id="game">
+    <p id="status"></p>
+    <div id="dice-row"></div>
+    <button id="roll-btn">Roll Dice</button>
+    <div id="score-cards"></div>
   </div>
-</header>
 
-<main>
-  <section class="game-panel">
-    <div class="turn-info">
-      <div>Current Player: <span id="currentPlayerName">—</span></div>
-      <div>Rolls Left: <span id="rollsLeft">3</span></div>
-    </div>
-    <div class="dice-row" id="diceRow"></div>
-    <div class="controls">
-      <button id="rollBtn">Roll Dice</button>
-      <button id="endTurnBtn">End Turn</button>
-    </div>
-  </section>
-  <section class="score-panel">
-    <h2>Score Card</h2>
-    <div id="scoreCards"></div>
-  </section>
-</main>
+  <script>
+    const CATEGORIES = [
+      "Ones","Twos","Threes","Fours","Fives","Sixes",
+      "Three of a Kind","Four of a Kind","Full House",
+      "Small Straight","Large Straight","Yahtzee","Chance"
+    ];
 
-<script>
-const CATEGORIES = ["Ones","Twos","Threes","Fours","Fives","Sixes","Three of a Kind","Four of a Kind","Full House","Small Straight","Large Straight","Yahtzee","Chance"];
-const STATE = { 
-  players: [], 
-  currentPlayer:0, 
-  dice:[1,1,1,1,1], 
-  held:[false,false,false,false,false], 
-  rollsLeft:3, 
-  sheets:[], 
-  started:false,
-  rolled: false   // new flag to track first roll
-};
+    const STATE = {
+      players:["Player 1","Player 2","Player 3","Player 4"],
+      currentPlayer:0,
+      dice:[1,1,1,1,1],
+      held:[false,false,false,false,false],
+      rolled:false,
+      rollsLeft:3,
+      sheets:[]
+    };
 
-const els = {
-  playerCount: document.getElementById("playerCount"),
-  startBtn: document.getElementById("startGameBtn"),
-  resetBtn: document.getElementById("resetGameBtn"),
-  currentPlayerName: document.getElementById("currentPlayerName"),
-  rollsLeft: document.getElementById("rollsLeft"),
-  diceRow: document.getElementById("diceRow"),
-  rollBtn: document.getElementById("rollBtn"),
-  endTurnBtn: document.getElementById("endTurnBtn"),
-  scoreCards: document.getElementById("scoreCards")
-};
+    STATE.players.forEach(()=>STATE.sheets.push(Object.fromEntries(CATEGORIES.map(c=>[c,null]))));
 
-function getPlayerNames(){
-  const n = parseInt(els.playerCount.value);
-  const names = [];
-  for(let i=0;i<n;i++){
-    const val = document.getElementById('p'+i).value.trim();
-    names.push(val || `Player ${i+1}`);
-  }
-  return names;
-}
+    const els = {
+      status:document.getElementById("status"),
+      diceRow:document.getElementById("dice-row"),
+      rollBtn:document.getElementById("roll-btn"),
+      scoreCards:document.getElementById("score-cards")
+    };
 
-function startGame(){
-  STATE.players = getPlayerNames();
-  STATE.sheets = STATE.players.map(()=> ({ scores: new Map(), locked: new Set(), upperTotal:0, lowerTotal:0, bonus:0, grandTotal:0 }));
-  STATE.currentPlayer = 0; STATE.dice=[1,1,1,1,1]; STATE.held=[false,false,false,false,false]; STATE.rollsLeft=3; STATE.started=true;
-  renderDice(); renderScoreCards(); updateTurnInfo();
-}
+    function rollDice(){
+      if(STATE.rollsLeft<=0) return;
+      STATE.rolled=true;
+      for(let i=0;i<5;i++){
+        if(!STATE.held[i]) STATE.dice[i]=Math.floor(Math.random()*6)+1;
+      }
+      STATE.rollsLeft--;
+      render();
+    }
 
-function resetGame(){ 
-  STATE.players=[]; STATE.sheets=[]; STATE.currentPlayer=0; 
-  STATE.dice=[1,1,1,1,1]; STATE.held=[false,false,false,false,false]; 
-  STATE.rollsLeft=3; STATE.started=false; STATE.rolled=false;
-  els.diceRow.innerHTML=''; els.scoreCards.innerHTML=''; updateTurnInfo(); 
-}
+    function toggleHold(i){
+      if(!STATE.rolled) return;
+      STATE.held[i]=!STATE.held[i];
+      render();
+    }
 
-function endTurn(){
-  STATE.currentPlayer=(STATE.currentPlayer+1)%STATE.players.length; 
-  STATE.dice=[1,1,1,1,1]; STATE.held=[false,false,false,false,false]; 
-  STATE.rollsLeft=3; STATE.rolled=false;
-  renderDice(); renderScoreCards(); updateTurnInfo();
-}
+    function endTurn(){
+      STATE.currentPlayer=(STATE.currentPlayer+1)%STATE.players.length;
+      STATE.rolled=false;
+      STATE.rollsLeft=3;
+      STATE.dice=[1,1,1,1,1];
+      STATE.held=[false,false,false,false,false];
+      render();
+    }
 
-function rollDieVal(){ return Math.floor(Math.random()*6)+1; }
+    function selectCategory(cat){
+      if(STATE.sheets[STATE.currentPlayer][cat]!==null) return;
+      STATE.sheets[STATE.currentPlayer][cat]=scoreCategory(cat,STATE.dice);
+      endTurn();
+    }
 
-function rollDice(){
-  if(!STATE.started || STATE.rollsLeft<=0) return;
-  STATE.rolled = true;  // first roll triggers dice visibility
-  STATE.dice = STATE.dice.map((v,i)=> STATE.held[i]?v:rollDieVal());
-  STATE.rollsLeft--; 
-  renderDice(); 
-  updateTurnInfo();
-}
+    function scoreCategory(cat,dice){
+      const counts=Object.values(dice.reduce((a,v)=>{a[v]=(a[v]||0)+1;return a;},{}));
+      const sum=dice.reduce((a,b)=>a+b,0);
+      switch(cat){
+        case "Ones":return dice.filter(v=>v===1).length*1;
+        case "Twos":return dice.filter(v=>v===2).length*2;
+        case "Threes":return dice.filter(v=>v===3).length*3;
+        case "Fours":return dice.filter(v=>v===4).length*4;
+        case "Fives":return dice.filter(v=>v===5).length*5;
+        case "Sixes":return dice.filter(v=>v===6).length*6;
+        case "Three of a Kind":return counts.some(c=>c>=3)?sum:0;
+        case "Four of a Kind":return counts.some(c=>c>=4)?sum:0;
+        case "Full House":return (counts.includes(3)&&counts.includes(2))?25:0;
+        case "Small Straight":return hasStraight(dice,4)?30:0;
+        case "Large Straight":return hasStraight(dice,5)?40:0;
+        case "Yahtzee":return counts.includes(5)?50:0;
+        case "Chance":return sum;
+      }
+    }
 
+    function hasStraight(dice,len){
+      const uniq=[...new Set(dice)].sort((a,b)=>a-b);
+      let streak=1,max=1;
+      for(let i=1;i<uniq.length;i++){
+        if(uniq[i]===uniq[i-1]+1){streak++;max=Math.max(max,streak);}
+        else streak=1;
+      }
+      return max>=len;
+    }
 
-function toggleHold(i){
-  if(!STATE.started || STATE.rollsLeft===3) return;
-  STATE.held[i]=!STATE.held[i]; renderDice();
-}
+    function renderDice(){
+      els.diceRow.innerHTML="";
+      if(!STATE.rolled) return; // hide dice until first roll
 
-function renderDice(){
-  els.diceRow.innerHTML='';
-  STATE.dice.forEach((v,i)=>{
-    const die = document.createElement('div'); 
-    die.className='die'+(STATE.held[i]?' held':'') + (!STATE.rolled ? ' hidden':'');
-    die.addEventListener('click',()=>toggleHold(i));
+      STATE.dice.forEach((v,i)=>{
+        const die=document.createElement("div");
+        die.className="die"+(STATE.held[i]?" held":"");
+        die.addEventListener("click",()=>toggleHold(i));
 
-    if(!STATE.rolled) return; // skip adding pips until first roll
+        const positions = {
+          1:[[50,50]],
+          2:[[25,25],[75,75]],
+          3:[[25,25],[50,50],[75,75]],
+          4:[[25,25],[25,75],[75,25],[75,75]],
+          5:[[25,25],[25,75],[50,50],[75,25],[75,75]],
+          6:[[25,25],[25,50],[25,75],[75,25],[75,50],[75,75]]
+        };
+        positions[v].forEach(([x,y])=>{
+          const pip=document.createElement("div");
+          pip.className="pip";
+          pip.style.left=x+"%";
+          pip.style.top=y+"%";
+          die.appendChild(pip);
+        });
+        els.diceRow.appendChild(die);
+      });
+    }
 
-    const positions = {1:[[50,50]],2:[[25,25],[75,75]],3:[[25,25],[50,50],[75,75]],4:[[25,25],[25,75],[75,25],[75,75]],5:[[25,25],[25,75],[50,50],[75,25],[75,75]],6:[[25,25],[25,50],[25,75],[75,25],[75,50],[75,75]]};
-    positions[v].forEach(([x,y])=>{
-      const pip=document.createElement('div'); 
-      pip.className='pip'; 
-      pip.style.left=x+'%'; 
-      pip.style.top=y+'%'; 
-      die.appendChild(pip);
-    });
-    els.diceRow.appendChild(die);
-  });
-}
+    function renderScoreCards(){
+      els.scoreCards.innerHTML="";
+      STATE.players.forEach((player,pIndex)=>{
+        const card=document.createElement("div");
+        card.className="score-card";
 
+        const title=document.createElement("h3");
+        title.textContent=player+(STATE.currentPlayer===pIndex?" (Current)":"");
+        card.appendChild(title);
 
-function updateTurnInfo(){ els.currentPlayerName.textContent = STATE.started ? STATE.players[STATE.currentPlayer] : '—'; els.rollsLeft.textContent=STATE.rollsLeft; }
+        for(const cat of CATEGORIES){
+          const btn=document.createElement("button");
+          btn.textContent=cat+": "+(STATE.sheets[pIndex][cat] ?? "");
+          if(STATE.sheets[pIndex][cat]!==null || pIndex!==STATE.currentPlayer){
+            btn.disabled=true;
+          } else {
+            btn.addEventListener("click",()=>selectCategory(cat));
+          }
+          card.appendChild(btn);
+        }
 
-function renderScoreCards(){
-  els.scoreCards.innerHTML='';
-  const sheet = STATE.sheets[STATE.currentPlayer];
-  CATEGORIES.forEach(cat=>{
-    const card = document.createElement('div');
-    card.className='category-card'+(sheet.locked.has(cat)?' locked':'');
-    card.textContent = cat + (sheet.scores.get(cat)?' : '+sheet.scores.get(cat):'');
-    if(!sheet.locked.has(cat)) card.addEventListener('click',()=>{ applyCategory(cat); });
-    els.scoreCards.appendChild(card);
-  });
-}
+        els.scoreCards.appendChild(card);
+      });
+    }
 
-function applyCategory(cat){
-  const dice=STATE.dice; const sheet=STATE.sheets[STATE.currentPlayer];
-  let score=0;
-  const counts=[0,0,0,0,0,0,0]; dice.forEach(d=>counts[d]++);
-  switch(cat){
-    case 'Ones': score=counts[1]; break;
-    case 'Twos': score=counts[2]*2; break;
-    case 'Threes': score=counts[3]*3; break;
-    case 'Fours': score=counts[4]*4; break;
-    case 'Fives': score=counts[5]*5; break;
-    case 'Sixes': score=counts[6]*6; break;
-    case 'Three of a Kind': score=counts.some(c=>c>=3)? dice.reduce((a,b)=>a+b,0):0; break;
-    case 'Four of a Kind': score=counts.some(c=>c>=4)? dice.reduce((a,b)=>a+b,0):0; break;
-    case 'Full House': score=(counts.some(c=>c===3)&&counts.some(c=>c===2))?25:0; break;
-    case 'Small Straight': score=([1,2,3,4].every(v=>counts[v])||[2,3,4,5].every(v=>counts[v])||[3,4,5,6].every(v=>counts[v]))?30:0; break;
-    case 'Large Straight': score=([1,2,3,4,5].every(v=>counts[v])||[2,3,4,5,6].every(v=>counts[v]))?40:0; break;
-    case 'Yahtzee': score=counts.some(c=>c===5)?50:0; break;
-    case 'Chance': score=dice.reduce((a,b)=>a+b,0); break;
-  }
-  sheet.scores.set(cat,score); sheet.locked.add(cat);
-  STATE.currentPlayer=(STATE.currentPlayer+1)%STATE.players.length; STATE.dice=[1,1,1,1,1]; STATE.held=[false,false,false,false,false]; STATE.rollsLeft=3;
-  renderDice(); renderScoreCards(); updateTurnInfo();
-}
+    function render(){
+      els.status.textContent=STATE.players[STATE.currentPlayer]+"'s turn. Rolls left: "+STATE.rollsLeft;
+      renderDice();
+      renderScoreCards();
+    }
 
-els.startBtn.addEventListener('click',startGame);
-els.resetBtn.addEventListener('click',resetGame);
-els.rollBtn.addEventListener('click',rollDice);
-els.endTurnBtn.addEventListener('click',()=>{ STATE.currentPlayer=(STATE.currentPlayer+1)%STATE.players.length; STATE.dice=[1,1,1,1,1]; STATE.held=[false,false,false,false,false]; STATE.rollsLeft=3; renderDice(); renderScoreCards(); updateTurnInfo(); });
-
-renderDice(); updateTurnInfo();
-</script>
+    els.rollBtn.addEventListener("click",rollDice);
+    render();
+  </script>
+</body>
+</html>
